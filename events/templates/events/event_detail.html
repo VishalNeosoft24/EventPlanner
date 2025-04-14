@@ -1,0 +1,33 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+  <h2>{{ event.title }}</h2>
+  <p>{{ event.description }}</p>
+  <p><strong>Date:</strong> {{ event.date }}</p>
+  <p><strong>Location:</strong> {{ event.location }}</p>
+  <p>{{ event.rsvp_set.count }} people have RSVP'd</p>
+
+  {% if event.image %}
+    <img src="{{ event.image.url }}" alt="{{ event.title }}" width="300">
+  {% endif %}
+  
+  {% if user.is_authenticated %}
+  {% if has_rsvped %}
+    <form method="post" action="{% url 'toggle_rsvp' event.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Cancel RSVP</button>
+    </form>
+  {% else %}
+    <form method="post" action="{% url 'toggle_rsvp' event.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">RSVP</button>
+    </form>
+  {% endif %}
+{% else %}
+  <p><a href="{% url 'login' %}">Log in</a> to RSVP.</p>
+{% endif %}
+  {% if user == event.created_by %}
+    <a href="{% url 'update_event' event.id %}" class="btn btn-warning">Edit Event</a>
+    <a href="{% url 'delete_event' event.id %}" class="btn btn-danger">Delete Event</a>
+  {% endif %}
+{% endblock %}
