@@ -5,10 +5,18 @@ from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm, EventForm
 from .models import Event, RSVP
 from django.contrib import messages
+from django.core.paginator import Paginator
+
 
 def home(request):
-    events = Event.objects.order_by('date')
-    return render(request, 'events/home.html', {'events': events})
+    events_list = Event.objects.order_by('date')
+    paginator = Paginator(events_list, 5)  # Show 5 events per page
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'events/home.html', {'page_obj': page_obj})
+
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
@@ -27,6 +35,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, 'Welcome! You have successfully registered!')
             return redirect('home')
     else:
         form = RegisterForm()
@@ -35,12 +44,22 @@ def register_view(request):
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            return redirect('home')
     else:
         form = AuthenticationForm()
+
+    # Add Bootstrap class dynamically
+    for field in form.fields.values():
+        field.widget.attrs.update({
+            'class': 'form-control',
+        })
+
+    if request.method == 'POST' and form.is_valid():
+        login(request, form.get_user())
+        messages.success(request, 'You have successfully logged in!')
+        return redirect('home')
+
     return render(request, 'events/login.html', {'form': form})
+
 
 def logout_view(request):
     logout(request)
@@ -60,7 +79,11 @@ def create_event(request):
             return redirect('home')
     else:
         form = EventForm()
-    return render(request, 'events/create_event.html', {'form': form})
+    return render(request, 'events/create_event.html', {
+        'form': form,
+        'is_update': False  # indicate it's a create form
+    })
+
 
 # Event Update (Authenticated User)
 @login_required
@@ -74,7 +97,12 @@ def update_event(request, event_id):
             return redirect('event_detail', event_id=event.id)
     else:
         form = EventForm(instance=event)
-    return render(request, 'events/create_event.html', {'form': form})
+    return render(request, 'events/create_event.html', {
+        'form': form,
+        'is_update': True,  # indicate it's an update form
+        'event': event
+    })
+
 
 # Event Delete (Authenticated User)
 @login_required
