@@ -1,33 +1,49 @@
 {% extends 'events/base.html' %}
 
 {% block content %}
-  <h2>{{ event.title }}</h2>
-  <p>{{ event.description }}</p>
-  <p><strong>Date:</strong> {{ event.date }}</p>
-  <p><strong>Location:</strong> {{ event.location }}</p>
-  <p>{{ event.rsvp_set.count }} people have RSVP'd</p>
+<div class="container my-5">
+  <div class="card border-0 shadow rounded-4 p-3">
+    <div class="row g-4 align-items-center">
+      
+      {% if event.image %}
+      <div class="col-md-4 text-center">
+        <img src="{{ event.image.url }}" alt="{{ event.title }}" class="img-fluid rounded-3" style="max-height: 200px; object-fit: cover;">
+      </div>
+      {% endif %}
 
-  {% if event.image %}
-    <img src="{{ event.image.url }}" alt="{{ event.title }}" width="300">
-  {% endif %}
-  
-  {% if user.is_authenticated %}
-  {% if has_rsvped %}
-    <form method="post" action="{% url 'toggle_rsvp' event.id %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger">Cancel RSVP</button>
-    </form>
-  {% else %}
-    <form method="post" action="{% url 'toggle_rsvp' event.id %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-success">RSVP</button>
-    </form>
-  {% endif %}
-{% else %}
-  <p><a href="{% url 'login' %}">Log in</a> to RSVP.</p>
-{% endif %}
-  {% if user == event.created_by %}
-    <a href="{% url 'update_event' event.id %}" class="btn btn-warning">Edit Event</a>
-    <a href="{% url 'delete_event' event.id %}" class="btn btn-danger">Delete Event</a>
-  {% endif %}
+      <div class="col-md-8">
+        <h2 class="fw-bold mb-2">{{ event.title }}</h2>
+        <p class="text-muted mb-3">{{ event.description }}</p>
+
+        <ul class="list-unstyled mb-4">
+          <li><strong>Date:</strong> {{ event.date }}</li>
+          <li><strong>Location:</strong> {{ event.location }}</li>
+          <p><i class="bi bi-people-fill me-1"></i>{{ event.rsvp_set.count }} people are attending</p>
+        </ul>
+
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'toggle_rsvp' event.id %}">
+            {% csrf_token %}
+            {% if has_rsvped %}
+              <button type="submit" class="btn btn-outline-danger w-100 mb-3">Cancel Attendance</button>
+            {% else %}
+              <button type="submit" class="btn btn-outline-success w-100 mb-3">Attend Event</button>
+            {% endif %}
+          </form>
+        {% else %}
+          <div class="alert alert-info text-center">
+            <a href="{% url 'login' %}" class="alert-link">Log in</a> to Attend Event.
+          </div>
+        {% endif %}
+
+        {% if user == event.created_by %}
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'update_event' event.id %}" class="btn btn-warning">Edit</a>
+          <a href="{% url 'delete_event' event.id %}" class="btn btn-danger">Delete</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

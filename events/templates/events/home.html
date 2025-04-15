@@ -1,13 +1,82 @@
 {% extends 'events/base.html' %}
 
 {% block content %}
-  <h2>Upcoming Events</h2>
-  <div class="list-group">
-    {% for event in events %}
-      <a href="{% url 'event_detail' event.id %}" class="list-group-item list-group-item-action">
-        <h5 class="mb-1">{{ event.title }}</h5>
-        <p class="mb-1">{{ event.date }}</p>
-      </a>
+<div class="container my-5">
+
+  {% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <h2 class="mb-4 text-center fw-bold">🎉 Upcoming Events</h2>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for event in page_obj %}
+    <div class="col">
+      <div class="card h-100 shadow-sm border-0 rounded-4">
+
+        {% if event.image %}
+        <img src="{{ event.image.url }}" class="card-img-top rounded-top-4" alt="{{ event.title }}"
+          style="height: 180px; object-fit: cover;">
+        {% endif %}
+
+        <div class="card-body d-flex flex-column justify-content-between">
+          <h5 class="card-title">{{ event.title }}</h5>
+          <p><i class="bi bi-people-fill me-1"></i>{{ event.rsvp_set.count }} people are attending</p>
+          <p class="card-text text-muted"><i class="bi bi-calendar-event"></i> {{ event.date }}</p>
+          <a href="{% url 'event_detail' event.id %}" class="btn btn-primary mt-auto w-100">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-muted text-center">No upcoming events found.</p>
     {% endfor %}
   </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&laquo;</span>
+      </li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+      <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+      {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&raquo;</span>
+      </li>
+      {% endif %}
+
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
 {% endblock %}
