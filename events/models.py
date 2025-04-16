@@ -1,11 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-import uuid
 
-def event_image_upload_path(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = f"banner_{uuid.uuid4()}.{ext}"
-    return f'events/{instance.id or "new"}/{filename}'
 
 
 class Event(models.Model):
@@ -13,7 +8,7 @@ class Event(models.Model):
     description = models.TextField()
     date = models.DateTimeField()
     location = models.CharField(max_length=255)
-    image = models.ImageField(upload_to=event_image_upload_path, null=True, blank=True)
+    image = models.ImageField(null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
