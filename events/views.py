@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from events.utils import upload_image_to_s3, delete_image_from_s3
 from .forms import RegisterForm, EventForm
 from .models import Event, RSVP
 from django.contrib import messages
 from django.core.paginator import Paginator
-
+from django.conf import settings
 
 def home(request):
     events_list = Event.objects.order_by('date')
@@ -74,6 +75,12 @@ def create_event(request):
         if form.is_valid():
             event = form.save(commit=False)
             event.created_by = request.user
+
+            image_file = request.FILES.get('image')
+            if image_file:
+                s3_url = upload_image_to_s3(image_file)
+                event.image = s3_url
+
             event.save()
             messages.success(request, 'Event created successfully!')
             return redirect('home')
@@ -81,7 +88,7 @@ def create_event(request):
         form = EventForm()
     return render(request, 'events/create_event.html', {
         'form': form,
-        'is_update': False  # indicate it's a create form
+        'is_update': False
     })
 
 
@@ -89,17 +96,27 @@ def create_event(request):
 @login_required
 def update_event(request, event_id):
     event = get_object_or_404(Event, pk=event_id, created_by=request.user)
+
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
-            form.save()
+            event = form.save(commit=False)
+
+            image_file = request.FILES.get('image')
+            if image_file:
+                # Upload new image and update the S3 URL
+                s3_url = upload_image_to_s3(image_file)
+                event.image = s3_url  # This overwrites old image URL
+
+            event.save()
             messages.success(request, 'Event updated successfully!')
             return redirect('event_detail', event_id=event.id)
     else:
         form = EventForm(instance=event)
+
     return render(request, 'events/create_event.html', {
         'form': form,
-        'is_update': True,  # indicate it's an update form
+        'is_update': True,
         'event': event
     })
 
@@ -108,10 +125,17 @@ def update_event(request, event_id):
 @login_required
 def delete_event(request, event_id):
     event = get_object_or_404(Event, pk=event_id, created_by=request.user)
+
     if request.method == 'POST':
+        # Delete image from S3 if it exists
+        if event.image:
+            delete_image_from_s3(str(event.image))
+
+        # Delete the event from DB
         event.delete()
         messages.success(request, 'Event deleted successfully!')
         return redirect('home')
+
     return render(request, 'events/confirm_delete.html', {'event': event})
 
 # RSVP to Event
