@@ -2,7 +2,15 @@
 
 {% block content %}
   <h2>Delete Event</h2>
-  <p>Are you sure you want to delete the event: {{ event.title }}?</p>
+
+  <p>Are you sure you want to delete the event: <strong>{{ event.title }}</strong>?</p>
+
+  {% if event.image %}
+    <div class="mb-3">
+      <img src="{{ event.image }}" alt="{{ event.title }}" class="img-fluid rounded" style="max-height: 300px; object-fit: cover;">
+    </div>
+  {% endif %}
+
   <form method="POST">
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Delete</button>
