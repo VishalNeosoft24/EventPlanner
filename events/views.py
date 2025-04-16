@@ -64,11 +64,12 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
+    messages.success(request, 'You have successfully logged out!')
     return redirect('home')
 
 
 # Event Create (Authenticated User)
-@login_required
+@login_required(login_url='/login/')
 def create_event(request):
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES)
@@ -93,7 +94,7 @@ def create_event(request):
 
 
 # Event Update (Authenticated User)
-@login_required
+@login_required(login_url='/login/')
 def update_event(request, event_id):
     event = get_object_or_404(Event, pk=event_id, created_by=request.user)
 
@@ -122,7 +123,7 @@ def update_event(request, event_id):
 
 
 # Event Delete (Authenticated User)
-@login_required
+@login_required(login_url='/login/')
 def delete_event(request, event_id):
     event = get_object_or_404(Event, pk=event_id, created_by=request.user)
 
@@ -139,7 +140,7 @@ def delete_event(request, event_id):
     return render(request, 'events/confirm_delete.html', {'event': event})
 
 # RSVP to Event
-@login_required
+@login_required(login_url='/login/')
 def toggle_rsvp(request, event_id):
     event = get_object_or_404(Event, id=event_id)
 
