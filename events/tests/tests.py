@@ -134,7 +134,6 @@ class LogoutViewTest(TestCase):
         self.assertIsNone(user)
 
 
-
 class HomeViewTest(TestCase):
 
     def setUp(self):
@@ -302,8 +301,6 @@ class CreateEventViewTestCase(TestCase):
         self.assertRedirects(response, f'/login/?next={self.url}')
 
 
-
-
 class UpdateEventViewTestCase(TestCase):
     def setUp(self):
         # Create a test user and log in
@@ -357,7 +354,6 @@ class UpdateEventViewTestCase(TestCase):
             self.assertEqual(self.event.date.strftime('%Y-%m-%d %H:%M'), '2025-05-02 15:00')
             self.assertEqual(self.event.image, 'https://s3.amazonaws.com/fake-bucket/updated.jpg')
 
-
     def test_update_event_unauthorized(self):
         # Log out current user
         self.client.logout()
@@ -365,12 +361,6 @@ class UpdateEventViewTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, f'/login/?next={self.url}')
 
-
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth.models import User
-from events.models import Event
-from unittest.mock import patch
 
 class DeleteEventViewTestCase(TestCase):
     def setUp(self):
@@ -416,8 +406,6 @@ class DeleteEventViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'events/confirm_delete.html')
         self.assertContains(response, 'Delete Me')
-
-
 
 
 class ToggleRSVPViewTestCase(TestCase):
