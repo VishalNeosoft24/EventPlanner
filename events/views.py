@@ -154,6 +154,3 @@ def toggle_rsvp(request, event_id):
     # If created, RSVP was added successfully
 
     return redirect('event_detail', event_id=event.id)
-
-# new feature(dropdown)
-# new feature(button)
