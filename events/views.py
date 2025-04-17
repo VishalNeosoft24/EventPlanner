@@ -50,7 +50,7 @@ def login_view(request):
     else:
         form = AuthenticationForm()
 
-    # Add Bootstrap class dynamically
+    # Add Bootstrap class dynamically(boostrap5)
     for field in form.fields.values():
         field.widget.attrs.update({
             'class': 'form-control',
