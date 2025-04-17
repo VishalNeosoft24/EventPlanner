@@ -20,6 +20,7 @@ def home(request):
 
 
 def event_detail(request, event_id):
+    # Fetch the event with the given event_id or return a 404 error if not found
     event = get_object_or_404(Event, pk=event_id)
     has_rsvped = False
     if request.user.is_authenticated:
