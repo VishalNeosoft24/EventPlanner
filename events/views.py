@@ -145,6 +145,7 @@ def delete_event(request, event_id):
 @login_required(login_url='/login/')
 def toggle_rsvp(request, event_id):
     event = get_object_or_404(Event, id=event_id)
+    print('event: ', event)
 
     rsvp, created = RSVP.objects.get_or_create(user=request.user, event=event)
 
