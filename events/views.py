@@ -36,6 +36,7 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Log the user in automatically after registration
             login(request, user)
             messages.success(request, 'Welcome! You have successfully registered!')
             return redirect('home')
