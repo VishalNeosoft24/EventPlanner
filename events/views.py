@@ -155,4 +155,4 @@ def toggle_rsvp(request, event_id):
 
     return redirect('event_detail', event_id=event.id)
 
-# new feature(button)
+# new feature(dropdown)
